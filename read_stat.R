@@ -2,6 +2,8 @@
 # prereq ------------------------------------------------------------------
 
 require(xml2)
+require(ggthemes)
+require(ggrepel)
 require(tidyverse)
 
 dir <- 'data/'
@@ -42,8 +44,25 @@ df <- tibble(dirs = list.files(dir,pattern = 'chain\\.task[0-9]{1}\\.out\\.xml|[
 df %>% 
   filter(parameter != 'Ground State Energy')
 
- df %>% 
-  ggplot
+df %>% 
+  mutate_at(vars(J,value),funs(as.numeric)) %>% 
+  ggplot(aes(J,value,col = as.factor(`T`)),group = `T`) +
+  geom_point() +
+  # geom_label_repel(aes(label = str_c('Temp=',`T`))) +
+  geom_line() +
+  facet_wrap(c('parameter'),scales = 'free') +
+  theme_bw()
+
+df_mod <- df %>% 
+  filter(parameter == 'Energy Gap') %>% 
+  mutate(J  = as.numeric(J))
+mod <- lm(value ~ J,df_mod)
+modelr::add_predictions(df_mod,mod)
+
+tibble(intercept = mod$coefficients[1],
+       slope = mod$coefficients[2])
+
+
 
 df <- tibble(dirs = list.files(dir,pattern = 'dirloop\\.task[0-9]{1}\\.out\\.xml|[0-9]{2}\\.out\\.xml',full.names = T)) %>% 
   mutate(model = str_extract_all(dirs,'Heiz|Hubbard',simplify = T)[,1],
