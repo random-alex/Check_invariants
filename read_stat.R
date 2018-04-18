@@ -45,8 +45,10 @@ df %>%
   filter(parameter != 'Ground State Energy')
 
 df %>% 
-  mutate_at(vars(J,value),funs(as.numeric)) %>% 
-  ggplot(aes(J,value,col = as.factor(`T`)),group = `T`) +
+  mutate_at(vars(J,value),funs(as.numeric)) %>%
+  mutate(`T` = as.numeric(`T`)) %>% 
+  arrange(`T`) %>% 
+  ggplot(aes(J,value,col = as_factor(as.character(`T`))),group = `T`) +
   geom_point() +
   # geom_label_repel(aes(label = str_c('Temp=',`T`))) +
   geom_line() +
