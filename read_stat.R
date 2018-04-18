@@ -53,6 +53,7 @@ df %>%
   # geom_label_repel(aes(label = str_c('Temp=',`T`))) +
   geom_line() +
   facet_wrap(c('parameter'),scales = 'free') +
+  scale_color_brewer(palette="Paired") +
   theme_bw()
 
 df_mod <- df %>% 
