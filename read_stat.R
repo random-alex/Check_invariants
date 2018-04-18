@@ -44,6 +44,11 @@ df <- tibble(dirs = list.files(dir,pattern = 'chain\\.task[0-9]{1}\\.out\\.xml|[
 df %>% 
   filter(parameter != 'Ground State Energy')
 
+
+
+# pics --------------------------------------------------------------------
+
+
 df %>% 
   mutate_at(vars(J,value),funs(as.numeric)) %>%
   mutate(`T` = as.numeric(`T`)) %>% 
@@ -64,20 +69,3 @@ modelr::add_predictions(df_mod,mod)
 
 tibble(intercept = mod$coefficients[1],
        slope = mod$coefficients[2])
-
-
-
-df <- tibble(dirs = list.files(dir,pattern = 'dirloop\\.task[0-9]{1}\\.out\\.xml|[0-9]{2}\\.out\\.xml',full.names = T)) %>% 
-  mutate(model = str_extract_all(dirs,'Heiz|Hubbard',simplify = T)[,1],
-         data = map(dirs,my_read_xml)) %>% 
-  unnest() %>% 
-  select(-dirs) %>% 
-  mutate_at(vars(value,J,`T`),funs(as.numeric))
-
-res <- df %>% 
-  filter(str_detect(parameter,' Magnetization$')) %>% 
-  arrange(J,`T`) %>% 
-  .[c(2,5),]
-res
-res$value
-

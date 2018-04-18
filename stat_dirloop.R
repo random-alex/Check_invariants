@@ -64,7 +64,7 @@ my_read_xml_corr <- function(fol,param = c('J','L','T')) {
 
 # read file ---------------------------------------------------------------
 
-df <- tibble(dirs = list.files(dir,pattern = 'dirloop\\.task[0-9]{1}\\.out\\.xml|[0-9]{2}\\.out\\.xml',full.names = T)) %>% 
+df <- tibble(dirs = list.files(dir,pattern = 'square_dirloop\\.task[0-9]{1}\\.out\\.xml|[0-9]{2}\\.out\\.xml',full.names = T)) %>% 
   mutate(model = str_extract_all(dirs,'Heiz|Hubbard',simplify = T)[,1],
          data = map(dirs,my_read_xml_aveg)) %>% 
   unnest() %>% 
@@ -72,7 +72,7 @@ df <- tibble(dirs = list.files(dir,pattern = 'dirloop\\.task[0-9]{1}\\.out\\.xml
   mutate(value = as.numeric(value))
 
 df_corr <- tibble(dirs = list.files(dir,
-                                    pattern = 'dirloop\\.task[0-9]{1}\\.out\\.xml|[0-9]{2}\\.out\\.xml',
+                                    pattern = 'square_dirloop\\.task[0-9]{1}\\.out\\.xml|[0-9]{2}\\.out\\.xml',
                                     full.names = T)) %>% 
   mutate(model = str_extract_all(dirs,'Heiz|Hubbard',
                                  simplify = T)[,1],
@@ -80,6 +80,7 @@ df_corr <- tibble(dirs = list.files(dir,
   unnest() %>% 
   select(-dirs) %>% 
   mutate(value = as.numeric(value))
+
 
 
 
