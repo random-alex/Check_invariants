@@ -9,69 +9,17 @@ require(tidyverse)
 dir <- 'data/'
 
 fol <- 'data/Heiz_chain_dirloop.task1.out.xml'
-# functions ---------------------------------------------------------------
-
-my_read_xml_aveg <- function(fol,param = c('J','L','T')) {
-  df <- read_xml(fol)
-  par <- xml_find_all(df,'.//PARAMETER') 
-  df_param <- tibble(mod_param = xml_attr(par,'name'),
-                     mod_value  = xml_text(par)) %>% 
-    filter(mod_param %in% param) %>% 
-    mutate(key = fol)
-  
-  dat <- xml_find_all(df,'.//AVERAGES//SCALAR_AVERAGE') 
-  
-  df_data <- tibble(parameter = xml_attr(dat,'name'),
-                    value  = xml_child(dat,search = 'MEAN') %>% xml_text(),
-                    key = fol) %>% 
-    drop_na()
-  
-  df_res <- left_join(df_param,df_data) %>% 
-    select(-key) %>% 
-    spread(mod_param,mod_value) %>% 
-    rename(temp = `T`)
-  return(df_res)
-}
-
-my_read_xml_corr <- function(fol,param = c('J','L','T')) {
-  df <- read_xml(fol)
-  par <- xml_find_all(df,'.//PARAMETER') 
-  df_param <- tibble(mod_param = xml_attr(par,'name'),
-                     mod_value  = xml_text(par)) %>% 
-    filter(mod_param %in% param) %>% 
-    mutate(key = fol)
-  
-  dat <- xml_find_all(df,'.//AVERAGES//SCALAR_AVERAGE') 
-  
-  df_data <- tibble(parameter = 'spin_corr',
-                    coordinats = xml_attr(dat,'indexvalue') %>% 
-                      str_replace_all('\\( | \\)','') %>% 
-                      str_replace_all(' -- ','__') ,
-                    value  = xml_child(dat,search = 'MEAN') %>% xml_text(),
-                    key = fol) %>% 
-    drop_na()
-  
-  df_res <- left_join(df_param,df_data) %>% 
-    select(-key) %>% 
-    spread(mod_param,mod_value) %>% 
-    rename(temp = `T`)
-  return(df_res)
-}
-
-
-
-
-
 
 # read file ---------------------------------------------------------------
 
-
+pat <- 'Heiz_square\\.task[0-9]{1}\\.out\\.xml'
+pat <- 'Heiz_chain\\.task[0-9]{1}\\.out\\.xml'
 
 df <- tibble(dirs = list.files(dir,
-                               pattern = 'Heiz_square\\.task[0-9]{1}\\.out\\.xml|Heiz_square\\.task[0-9]{1}\\.out\\.xml',
+                               pattern = pat,
                                full.names = T)) %>% 
   mutate(model = str_extract_all(dirs,'Heiz|Hubbard',simplify = T)[,1],
-         data = map(dirs,my_read_xml)) %>% 
+         data = map(dirs,my_read_xml_aveg)) %>% 
   unnest() %>% 
   select(-dirs) %>% 
   mutate(value = as.numeric(value))
